@@ -1,0 +1,38 @@
+name: build123d runtime benchmark
+
+on:
+  push:
+    branches:
+      - issue/1-build123d-batch-benchmark
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run benchmark
+        run: python scripts/benchmark_build123d_runtime.py
+
+      - name: Show result
+        run: cat results/build123d-runtime.md
+
+      - name: Upload timing evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: build123d-runtime-timing
+          path: |
+            results/build123d-runtime.json
+            results/build123d-runtime.md
