@@ -5,7 +5,8 @@ import subprocess
 import time
 from pathlib import Path
 
-IMAGE = "ghcr.io/brainboxemb/cad-reference:v0.3.1"\nPYTHON = "/opt/build123d/bin/python"
+IMAGE = "ghcr.io/brainboxemb/cad-reference:v0.3.1"
+PYTHON = "/opt/build123d/bin/python"
 COUNT = 10
 ROUNDS = 3
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,8 +24,14 @@ def run_container(args: list[str]) -> tuple[float, dict]:
         *args,
     ]
     started = time.perf_counter()
-    completed = subprocess.run(command, check=True, text=True, capture_output=True)
+    completed = subprocess.run(command, text=True, capture_output=True)
     elapsed = time.perf_counter() - started
+    if completed.returncode:
+        raise RuntimeError(
+            f"container failed ({completed.returncode})\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr}"
+        )
     payload = json.loads(completed.stdout.strip().splitlines()[-1])
     return elapsed, payload
 
@@ -80,7 +87,10 @@ def main() -> None:
         "speedup": speedup,
         "saved_seconds": avg_separate - avg_batch,
     }
-    (OUT / "build123d-runtime.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    (OUT / "build123d-runtime.json").write_text(
+        json.dumps(data, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     summary = f"""# build123d runtime reuse result
 
