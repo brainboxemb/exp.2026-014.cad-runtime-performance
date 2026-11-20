@@ -5,7 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
-IMAGE = "ghcr.io/brainboxemb/cad-reference:v0.3.1"
+IMAGE = "ghcr.io/brainboxemb/cad-reference:v0.3.1"\nPYTHON = "/opt/build123d/bin/python"
 COUNT = 10
 ROUNDS = 3
 ROOT = Path(__file__).resolve().parents[1]
@@ -19,7 +19,7 @@ def run_container(args: list[str]) -> tuple[float, dict]:
         "-v", f"{ROOT}:/workspace:ro",
         "-w", "/workspace",
         IMAGE,
-        "python", "scripts/build123d_worker.py",
+        PYTHON, "scripts/build123d_worker.py",
         *args,
     ]
     started = time.perf_counter()
