@@ -1,0 +1,32 @@
+name: CadQuery headless footprint
+
+on:
+  push:
+    branches:
+      - issue/3-cadquery-headless-footprint
+  workflow_dispatch:
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build normal CadQuery image
+        run: docker build --target full -t cadquery-full:experiment -f cadquery/Dockerfile .
+
+      - name: Build headless CadQuery image
+        run: docker build --target headless -t cadquery-headless:experiment -f cadquery/Dockerfile .
+
+      - name: Measure images
+        run: python scripts/measure_cadquery_images.py
+
+      - name: Show result
+        run: cat results/cadquery-headless.md
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cadquery-headless-footprint
+          path: |
+            results/cadquery-headless.json
+            results/cadquery-headless.md
